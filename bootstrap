@@ -4,6 +4,16 @@ DEBUG='false'
 RUBY_VERSION="2.5.1"
 BASH_PROFILE="${HOME}/.bash_profile"
 
+MY_TEMP="${HOME}/tmp"
+mkdir -p ${MY_TEMP}
+
+# Define reboot indicator
+BOOTSTRAP_REBOOT="${HOME}/.bootstrap_reboot"
+rm -f ${BOOTSTRAP_REBOOT}
+
+# Presence of this file indicates whether this is a personal system
+BOOTSTRAP_PERSONAL="${HOME}/.bootstrap_personal"
+
 debug() {
   if [ $DEBUG == 'true' ]; then
     echo "DEBUG: $1"
@@ -94,6 +104,17 @@ if [ "$OS_TYPE" == 'debian' ]; then
     error "On debian-based systems, only 'apt-get' is supported for installation"
   fi
 fi
+
+# Only append to path if not present
+function path_safe_append () {
+  if ! echo "$PATH" | /bin/grep -Eq "(^|:)$1($|:)" ; then
+    if [ "$2" = "before" ] ; then
+      export PATH="$1:$PATH"
+    else
+      export PATH="$PATH:$1"
+    fi
+  fi
+}
 
 function force_update_yes_if_debian_like() {
     # APT::Get::force-yes "true"; deprecated
@@ -205,17 +226,17 @@ function install_ruby_if_missing() {
         fi
         libssl=$(apt list --installed 2>&1 | grep -iv 'warning' | grep libssl-dev)
         if [ "$libssl" == "" ]; then
-            info "Installing libssl-dev (ruby prerequisite)"
+            info "Installing libssl-dev"
             sudo apt-get install -y libssl-dev
         fi
         libreadline=$(apt list --installed 2>&1 | grep -iv 'warning' | grep libreadline-dev)
         if [ "$libreadline" == "" ]; then
-            info "Installing libreadline-dev (ruby prerequisite)"
+            info "Installing libreadline-dev"
             sudo apt-get install -y libreadline-dev
         fi
         zlib1g=$(apt list --installed 2>&1 | grep -iv 'warning' | grep zlib1g-dev)
         if [ "$zlib1g" == "" ]; then
-            info "Installing zlib1g-dev (ruby prerequisite)"
+            info "Installing zlib1g-dev"
             sudo apt-get install -y zlib1g-dev
         fi
     fi
@@ -224,7 +245,7 @@ function install_ruby_if_missing() {
         mas=$(which mas)
         if [ "$mas" == "" ]; then
             # Install mas
-            info "Installing mas (Mac App Store command-line)"
+            info "Installing mas - Mac App Store command-line"
             brew install mas
         fi
         # Make sure Xcode is installed - gets gcc etc.
@@ -256,56 +277,56 @@ function install_ruby_if_missing() {
 
 # TODO This could all go into the python-based portion of the installation
 
-function find_ansible_bin() {
-    ansible_bin=$(which ansible)
-    if [ -z "$ansible_bin" ]; then
-        ansible_find=$(sudo find / -name ansible)
-        if [ -n "$ansible_find"  ]; then
-            ansible_find=$(sudo find / -name ansible | grep bin)
-            if [ -n "$ansible_find" ]; then
-                echo $ansible_find
-            else
-                echo -n ""
-            fi
-        else
-            echo -n ""
-        fi
-    else
-        echo $ansible_bin
-    fi
-}
-
-function install_ansible_if_missing() {
-    if [ $DEBUG == 'true' ]; then
-        echo "install_ansible_if_needed PATH ${PATH}"
-        echo "install_ansible_if_needed python3 which $(which python3)"
-        echo "install_ansible_if_needed pip3 which $(which pip3)"
-    fi
-    ansible_bin=$(find_ansible_bin)
-    if [ -z "$ansible_bin" ]; then
-        # Force ansible to be installed using python3
-        pip3 install ansible
-        ansible_bin=$(find_ansible_bin)
-    fi
-    export ANSIBLE_BIN_DIR=$(dirname $ansible_bin)
-}
-
-function add_ansible_bin_to_path_if_missing() {
-    echo "$PATH" | grep "$ANSIBLE_BIN_DIR" > /dev/null
-    exit_code=$?
-    if [ "$exit_code" == "1" ]; then
-        export PATH="$PATH:$ANSIBLE_BIN_DIR"
-    fi
-    if [ -f $BASH_PROFILE ]; then
-        grep "$ANSIBLE_BIN_DIR" $BASH_PROFILE > /dev/null
-        exit_code=$?
-        if [ "$exit_code" == "1" ]; then
-            echo "export PATH=\"$PATH\"" >> $BASH_PROFILE
-        fi
-    else
-        echo "export PATH=\"$PATH\"" > $BASH_PROFILE
-    fi
-}
+#function find_ansible_bin() {
+#    ansible_bin=$(which ansible)
+#    if [ -z "$ansible_bin" ]; then
+#        ansible_find=$(sudo find / -name ansible)
+#        if [ -n "$ansible_find"  ]; then
+#            ansible_find=$(sudo find / -name ansible | grep bin)
+#            if [ -n "$ansible_find" ]; then
+#                echo $ansible_find
+#            else
+#                echo -n ""
+#            fi
+#        else
+#            echo -n ""
+#        fi
+#    else
+#        echo $ansible_bin
+#    fi
+#}
+#
+#function install_ansible_if_missing() {
+#    if [ $DEBUG == 'true' ]; then
+#        echo "install_ansible_if_needed PATH ${PATH}"
+#        echo "install_ansible_if_needed python3 which $(which python3)"
+#        echo "install_ansible_if_needed pip3 which $(which pip3)"
+#    fi
+#    ansible_bin=$(find_ansible_bin)
+#    if [ -z "$ansible_bin" ]; then
+#        # Force ansible to be installed using python3
+#        pip3 install ansible
+#        ansible_bin=$(find_ansible_bin)
+#    fi
+#    export ANSIBLE_BIN_DIR=$(dirname $ansible_bin)
+#}
+#
+#function add_ansible_bin_to_path_if_missing() {
+#    echo "$PATH" | grep "$ANSIBLE_BIN_DIR" > /dev/null
+#    exit_code=$?
+#    if [ "$exit_code" == "1" ]; then
+#        export PATH="$PATH:$ANSIBLE_BIN_DIR"
+#    fi
+#    if [ -f $BASH_PROFILE ]; then
+#        grep "$ANSIBLE_BIN_DIR" $BASH_PROFILE > /dev/null
+#        exit_code=$?
+#        if [ "$exit_code" == "1" ]; then
+#            echo "export PATH=\"$PATH\"" >> $BASH_PROFILE
+#        fi
+#    else
+#        echo "export PATH=\"$PATH\"" > $BASH_PROFILE
+#    fi
+#}
 
 
 ####
@@ -322,18 +343,18 @@ install_python3_pip3_if_missing
 install_rbenv_if_missing
 install_ruby_if_missing
 
-
-if [ $DEBUG == 'true' ]; then
-    echo "PATH ${PATH}"
-    echo "python3 which $(which python3)"
-    echo "pip3 which $(which pip3)"
-    echo "ANSIBLE_BIN_DIR ${ANSIBLE_BIN_DIR}"
-    echo "ANSIBLE_BIN $(which ansible)"
-fi
-
 # Restart to get everything as it should be
 # Currently only do this on non-MacOS
 if [ "$OS_TYPE" == 'debian' ]; then
-    info "Rebooting system"
+    info "Signal reboot at the end of bootstrap process"
+    touch ${BOOTSTRAP_REBOOT}
+    #sudo reboot
+fi
+
+curl -fsSL  https://raw.githubusercontent.com/tflynn/configure_system/master/bootstrap.dotfiles -o "${MY_TEMP}/bootstrap.dotfiles"
+chmod a+x "${MY_TEMP}/bootstrap.dotfiles"
+source "${MY_TEMP}/bootstrap.dotfiles"
+
+if [ -f ${BOOTSTRAP_REBOOT} ]; then
     sudo reboot
 fi
