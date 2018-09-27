@@ -355,6 +355,6 @@ curl -fsSL  https://raw.githubusercontent.com/tflynn/configure_system/master/boo
 chmod a+x "${MY_TEMP}/bootstrap.dotfiles"
 source "${MY_TEMP}/bootstrap.dotfiles"
 
-if [ -f ${BOOTSTRAP_REBOOT} ]; then
+if [ "$OS_TYPE" == 'debian' ] && [ -f ${BOOTSTRAP_REBOOT} ]; then
     sudo reboot
 fi
