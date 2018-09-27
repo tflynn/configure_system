@@ -20,6 +20,7 @@ function link_startup_file() {
             unlink ${target_file_name}
         fi
         ln -s ${full_source_file_name} ${target_file_name}
+        chmod a+x ${target_file_name}
     fi
 }
 
