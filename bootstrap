@@ -356,5 +356,6 @@ chmod a+x "${MY_TEMP}/bootstrap.dotfiles"
 source "${MY_TEMP}/bootstrap.dotfiles"
 
 if [ "$OS_TYPE" == 'debian' ] && [ -f ${BOOTSTRAP_REBOOT} ]; then
+    rm ${BOOTSTRAP_REBOOT}
     sudo reboot
 fi

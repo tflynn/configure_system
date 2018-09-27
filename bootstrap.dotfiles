@@ -89,7 +89,7 @@ mkdir -p "$HOME/bin"
 link_bin_files
 
 # Enable useful aliases
-# source ${HOME}/.bash_profile
+source ${HOME}/.bash_profile
 bash-it enable alias general git
 bash-it enable plugin alias-completion base
 my-bash-it enable alias general git osx python vagrant
