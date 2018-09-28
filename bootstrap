@@ -348,12 +348,13 @@ install_ruby_if_missing
 if [ "$OS_TYPE" == 'debian' ]; then
     info "Signal reboot at the end of bootstrap process"
     touch ${BOOTSTRAP_REBOOT}
-    #sudo reboot
 fi
 
 curl -fsSL  https://raw.githubusercontent.com/tflynn/configure_system/master/bootstrap.dotfiles -o "${MY_TEMP}/bootstrap.dotfiles"
 chmod a+x "${MY_TEMP}/bootstrap.dotfiles"
 source "${MY_TEMP}/bootstrap.dotfiles"
+
+# TODO run bootstrap.py to load and run ansible
 
 if [ "$OS_TYPE" == 'debian' ] && [ -f ${BOOTSTRAP_REBOOT} ]; then
     rm ${BOOTSTRAP_REBOOT}

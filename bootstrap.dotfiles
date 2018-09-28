@@ -32,12 +32,18 @@ fi
 if [ -f ${BOOTSTRAP_PERSONAL} ]; then
     if ! [ -d my-bash-it ]; then
         git clone git@github.com:tflynn/my-bash-it.git
+    else
+        git pull origin master
     fi
     if ! [ -d dotfiles ]; then
         git clone git@github.com:tflynn/dotfiles.git
+    else
+        git pull origin master
     fi
     if ! [ -d mybin ]; then
         git clone git@github.com:tflynn/mybin.git
+    else
+        git pull origin master
     fi
 
     # Link startup files locally to host-based directory (as for today)
@@ -50,12 +56,18 @@ if [ -f ${BOOTSTRAP_PERSONAL} ]; then
 else
     if ! [ -d my-bash-it ]; then
         git clone https://github.com/tflynn/my-bash-it.git
+    else
+        git pull origin master
     fi
     if ! [ -d dotfiles ]; then
         git clone https://github.com/tflynn/public_dotfiles.git dotfiles
+    else
+        git pull origin master
     fi
     if ! [ -d mybin ]; then
         git clone https://github.com/tflynn/mybin.git
+    else
+        git pull origin master
     fi
     # Link startup files locally
     link_startup_file "bash_env"
