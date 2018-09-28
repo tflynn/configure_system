@@ -5,7 +5,7 @@ Configure a (new) system from scratch
 ## Intallation
 
 ```
-curl -fsSL  https://raw.githubusercontent.com/tflynn/configure_system/master/bootstrap | bash -
+curl -fsSL  https://raw.githubusercontent.com/tflynn/configure_system/master/bootstrap.bash | bash -
 ```
 
 'bootstrap' will:
@@ -54,6 +54,18 @@ Copies of your original startup files are saved in:
 
   `${HOME}/.startup_backup/<datetamp>`
   
+### Automatic
+
+An experimental, largely untested script that automates removal can be run via:
+
+```
+curl -fsSL  https://raw.githubusercontent.com/tflynn/configure_system/master/unbootstrap.bash | bash -
+```
+
+This script has support for removing homebrew, git and python3/pip3, but that support is disabled.
+ 
+### Manual
+
 Some things are hard to remove, or probably should not be removed:
 
 * (macOS) To remove homebrew
