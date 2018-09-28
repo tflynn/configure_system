@@ -43,7 +43,7 @@ If the target system is intended to be a personal system:
     `touch ${HOME}/.bootstrap_personal`
 
 
-** Removal
+## Removal
 
 Copies of your original startup files are saved in:
 
