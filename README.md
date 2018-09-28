@@ -42,7 +42,12 @@ If the target system is intended to be a personal system:
 
     `touch ${HOME}/.bootstrap_personal`
 
+## Updates
 
+To update aliases, binaries etc.:
+
+  `update_startup`
+  
 ## Removal
 
 Copies of your original startup files are saved in:
@@ -81,5 +86,6 @@ To remove almost everything else:
   
 Finally, restore your original startup files:
 
-    `cp ${HOME}/.startup_backup/<datetamp>/.bash* ${HOME}`    
-    Remember to restart your shell to see all the changes take effect.
+`cp ${HOME}/.startup_backup/<datetamp>/.bash* ${HOME}`
+
+Remember to restart your shell to see all the changes take effect.
