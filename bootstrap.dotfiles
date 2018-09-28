@@ -28,6 +28,10 @@ mkdir -p ${STARTUP_DIR}
 cd ${STARTUP_DIR}
 if ! [ -d bash-it ]; then
     git clone https://github.com/Bash-it/bash-it.git
+else
+    pushd bash-it
+    git pull origin master
+    popd
 fi
 if [ -f ${BOOTSTRAP_PERSONAL} ]; then
     if ! [ -d my-bash-it ]; then
