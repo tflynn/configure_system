@@ -141,16 +141,30 @@ function remove_dead_links() {
 
 function restore_startup_files() {
     if [ -d "${HOME}/.startup_backup" ]; then
-        info "Restoring startup files from backup"
-        backup_dir="${HOME}/.startup_backup/$(ls -1t ${HOME}/.startup_backup | head -n 1)"
-        cp ${backup_dir}/.bash* ${HOME}
+        echo "Restoring startup files from backup"
+        backup_base_dir=$(ls -1t ${HOME}/.startup_backup | head -n 1)
+        backup_dir="${HOME}/.startup_backup/$backup_base_dir"
+        dotfilelist=('.bash_env' '.bashrc' '.bash_profile' '.bash_local' '.bash_aliases')
+        for dotfile in ${dotfilelist[@]}
+        do
+          #echo "dotfile ${dotfile}"
+          base_name=${dotfile}
+          backup_file="${backup_dir}/${base_name}"
+          target_file="${HOME}/${base_name}"
+          #echo "backup_file $backup_file target_file $target_file"
+          if [ -L "${target_file}" ]; then
+            echo "Restoring ${target_file} from $backup_file"
+            unlink ${target_file}
+            cp $backup_file ${HOME}
+          fi
+        done
     fi
 }
 
 # removal sequence
 
 # Make this harder for personal systems
-if ! [ -f ${BOOTSTRAP_PERSONAL} ]; then
+#if ! [ -f ${BOOTSTRAP_PERSONAL} ]; then
     remove_rbenv
     remove_dotfiles
     remove_dead_links
@@ -158,4 +172,4 @@ if ! [ -f ${BOOTSTRAP_PERSONAL} ]; then
     # remove_python3_pip3
     # remove_git
     # remove_homebrew_if_macos
-fi
+#fi
