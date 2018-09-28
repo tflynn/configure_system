@@ -21,7 +21,7 @@ def run_command(**kwargs):
         results = p.communicate()
         out = results[0].decode('UTF8').strip()
         err = results[1].decode('UTF8').strip()
-        return (out,err)
+        return out,err
     else:
         return None
 

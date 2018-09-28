@@ -4,8 +4,14 @@
 BOOTSTRAP_PERSONAL="${HOME}/.bootstrap_personal"
 
 export STARTUP_DIR="${HOME}/.startup"
+STARTUP_BACKUP_DIR="${HOME}/.startup_backup"
 
 function link_startup_file() {
+
+    backup_timestamp=$(date +%Y%m%d_%H%M%S)
+    startup_backup_dir="${STARTUP_BACKUP_DIR}/${backup_timestamp}"
+    mkdir -p ${startup_backup_dir}
+
     source_file_name=$1
     if [ "$2" == "" ]; then
         full_source_file_name="${STARTUP_DIR}/dotfiles/${source_file_name}"
@@ -16,7 +22,7 @@ function link_startup_file() {
     target_file_name="$HOME/.${source_file_name}"
     if [ -f ${full_source_file_name} ]; then
         if [ -f ${target_file_name} ]; then
-        #if [ -h ${target_file_name} ]; then
+            cp ${target_file_name} ${startup_backup_dir}
             rm -f ${target_file_name}
         fi
         ln -s ${full_source_file_name} ${target_file_name}
@@ -25,7 +31,10 @@ function link_startup_file() {
 }
 
 mkdir -p ${STARTUP_DIR}
+mkdir -p ${STARTUP_BACKUP_DIR}
+
 cd ${STARTUP_DIR}
+
 if ! [ -d bash-it ]; then
     git clone https://github.com/Bash-it/bash-it.git
 else
