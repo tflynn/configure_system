@@ -164,7 +164,7 @@ function restore_startup_files() {
 # removal sequence
 
 # Make this harder for personal systems
-#if ! [ -f ${BOOTSTRAP_PERSONAL} ]; then
+if ! [ -f ${BOOTSTRAP_PERSONAL} ]; then
     remove_rbenv
     remove_dotfiles
     remove_dead_links
@@ -172,4 +172,4 @@ function restore_startup_files() {
     # remove_python3_pip3
     # remove_git
     # remove_homebrew_if_macos
-#fi
+fi

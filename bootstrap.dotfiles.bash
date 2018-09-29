@@ -16,9 +16,15 @@ function link_startup_file() {
     if [ "$2" == "" ]; then
         full_source_file_name="${STARTUP_DIR}/dotfiles/${source_file_name}"
     else
+        # Presence of source_prefix is also a marker for a personal system.
+        # So link from reference copy
         source_prefix=$2
-        full_source_file_name="${STARTUP_DIR}/dotfiles/${source_prefix}/${source_file_name}"
-    fi
+        # Don't link bash_local to reference. Leave it local
+        if [ "$source_file_name" == "bash_local" ]; then
+            full_source_file_name="${STARTUP_DIR}/dotfiles/${source_prefix}/${source_file_name}"    
+        else
+            full_source_file_name="${STARTUP_DIR}/dotfiles/reference/${source_file_name}"    
+        fi
     target_file_name="$HOME/.${source_file_name}"
     if [ -f ${full_source_file_name} ]; then
         if [ -f ${target_file_name} ]; then
