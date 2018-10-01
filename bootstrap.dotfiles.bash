@@ -15,7 +15,7 @@ function link_startup_file() {
     source_file_name=$1
     if [ "$2" == "" ]; then
         full_source_file_name="${STARTUP_DIR}/dotfiles/${source_file_name}"
-    else
+    else:
         # Presence of source_prefix is also a marker for a personal system.
         # So link from reference copy
         source_prefix=$2
@@ -25,6 +25,7 @@ function link_startup_file() {
         else
             full_source_file_name="${STARTUP_DIR}/dotfiles/reference/${source_file_name}"    
         fi
+    fi
     target_file_name="$HOME/.${source_file_name}"
     if [ -f ${full_source_file_name} ]; then
         if [ -f ${target_file_name} ]; then
