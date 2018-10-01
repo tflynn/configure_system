@@ -142,8 +142,8 @@ function install_homebrew_and_cask_if_macos() {
     if [ "$brew" == "" ]; then
        info "Installing Homebrew"
        /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-       info "Installing homebrew cask"
-       brew tap caskroom/cask
+#       info "Installing homebrew cask"
+#       brew tap caskroom/cask
     fi
   fi
 }
