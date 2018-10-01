@@ -355,8 +355,16 @@ fi
 curl -fsSL  https://raw.githubusercontent.com/tflynn/configure_system/master/bootstrap.dotfiles -o "${MY_TEMP}/bootstrap.dotfiles.bash"
 chmod a+x "${MY_TEMP}/bootstrap.dotfiles"
 source "${MY_TEMP}/bootstrap.dotfiles"
+rm "${MY_TEMP}/bootstrap.dotfiles"
 
-# TODO run bootstrap.py to load and run ansible
+if [ "$OS" == 'macos' ]; then
+    :
+    # Run macos_installer
+    curl -fsSL  https://raw.githubusercontent.com/tflynn/configure_system/master/bootstrap.macos_installer.bash -o "${MY_TEMP}/bootstrap.macos_installer.bash"
+    # Do it this way to preserve the current environment
+    source "${MY_TEMP}/bootstrap.macos_installer.bash"
+    rm "${MY_TEMP}/bootstrap.macos_installer.bash"
+fi
 
 if [ "$OS_TYPE" == 'debian' ] && [ -f ${BOOTSTRAP_REBOOT} ]; then
     rm ${BOOTSTRAP_REBOOT}
