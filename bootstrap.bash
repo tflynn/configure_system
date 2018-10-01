@@ -352,9 +352,9 @@ if [ "$OS_TYPE" == 'debian' ]; then
     touch ${BOOTSTRAP_REBOOT}
 fi
 
-curl -fsSL  https://raw.githubusercontent.com/tflynn/configure_system/master/bootstrap.dotfiles -o "${MY_TEMP}/bootstrap.dotfiles.bash"
-chmod a+x "${MY_TEMP}/bootstrap.dotfiles"
-source "${MY_TEMP}/bootstrap.dotfiles"
+curl -fsSL  https://raw.githubusercontent.com/tflynn/configure_system/master/bootstrap.dotfiles.bash -o "${MY_TEMP}/bootstrap.dotfiles.bash"
+chmod a+x "${MY_TEMP}/bootstrap.dotfile.bash"
+source "${MY_TEMP}/bootstrap.dotfiles.bash"
 rm "${MY_TEMP}/bootstrap.dotfiles"
 
 if [ "$OS" == 'macos' ]; then
