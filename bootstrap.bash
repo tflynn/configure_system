@@ -136,12 +136,14 @@ function update_if_debian_like() {
   fi
 }
 
-function install_homebrew_if_macos() {
+function install_homebrew_and_cask_if_macos() {
   if [ $OS == 'macos' ]; then
     brew=$(which brew)
     if [ "$brew" == "" ]; then
        info "Installing Homebrew"
        /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+       info "Installing homebrew cask"
+       brew tap caskroom/cask
     fi
   fi
 }
@@ -333,7 +335,7 @@ function install_ruby_if_missing() {
 # Perform the installations in sequence
 ####
 
-install_homebrew_if_macos
+install_homebrew_and_cask_if_macos
 force_update_yes_if_debian_like
 update_if_debian_like
 install_git_if_missing
