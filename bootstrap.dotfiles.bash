@@ -15,7 +15,7 @@ function link_startup_file() {
     source_file_name=$1
     if [ "$2" == "" ]; then
         full_source_file_name="${STARTUP_DIR}/dotfiles/${source_file_name}"
-    else:
+    else
         # Presence of source_prefix is also a marker for a personal system.
         # So link from reference copy
         source_prefix=$2
@@ -32,6 +32,9 @@ function link_startup_file() {
             cp ${target_file_name} ${startup_backup_dir}
             rm -f ${target_file_name}
         fi
+        ln -s ${full_source_file_name} ${target_file_name}
+        chmod a+x ${target_file_name}
+    else
         ln -s ${full_source_file_name} ${target_file_name}
         chmod a+x ${target_file_name}
     fi
