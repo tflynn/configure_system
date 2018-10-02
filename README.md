@@ -34,9 +34,13 @@ beyond what should be present on any basic *nix-like system.
 * Bash
 * Standard tools - e.g. grep, cut, ...
 
-If the target system is intended to be a personal system:
+If the target system is running MacOS
 
 * Log into the Apple Store
+* Accept any requests to login or allow installation of system extensions
+
+If the target system is intended to be a personal system:
+
 * Generate a suitable public/private key
 * Load the public key in github
 * Mark system as a personal system
