@@ -311,7 +311,7 @@ install_gcc_if_ubuntu_if_missing
 install_rbenv_if_missing
 install_ruby_if_missing
 
-# Restart to get everything as it should be
+# Signal reboot to get everything as it should be
 # Currently only do this on non-MacOS
 if [ "$OS_TYPE" == 'debian' ]; then
     info "Signal reboot at the end of bootstrap process"
@@ -324,7 +324,6 @@ source "${MY_TEMP}/bootstrap.dotfiles.bash"
 # rm "${MY_TEMP}/bootstrap.dotfiles.bash"
 
 if [ "$OS" == 'macos' ]; then
-    :
     # Run macos_installer
     curl -fsSL  https://raw.githubusercontent.com/tflynn/configure_system/master/bootstrap.macos_installer.bash -o "${MY_TEMP}/bootstrap.macos_installer.bash"
     # Do it this way to preserve the current environment
@@ -332,6 +331,8 @@ if [ "$OS" == 'macos' ]; then
     rm "${MY_TEMP}/bootstrap.macos_installer.bash"
 fi
 
+# Restart to get everything as it should be
+# Currently only do this on non-MacOS
 if [ "$OS_TYPE" == 'debian' ] && [ -f ${BOOTSTRAP_REBOOT} ]; then
     rm ${BOOTSTRAP_REBOOT}
     sudo reboot
