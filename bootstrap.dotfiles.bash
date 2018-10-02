@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
+
 DEBUG='false'
+VERSION="0.5"
 
 debug() {
   if [ $DEBUG == 'true' ]; then
@@ -37,6 +39,8 @@ HEADER
 FOOTER
     exit 1
 }
+
+info "Configure dot files (${VERSION})"
 
 # Presence of this file indicates whether this is a personal system
 BOOTSTRAP_PERSONAL="${HOME}/.bootstrap_personal"
