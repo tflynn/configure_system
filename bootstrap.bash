@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
 DEBUG='false'
+VERSION="0.5"
 RUBY_VERSION="2.5.1"
 BASH_PROFILE="${HOME}/.bash_profile"
+
 
 MY_TEMP="${HOME}/tmp"
 mkdir -p ${MY_TEMP}
@@ -54,6 +56,8 @@ FOOTER
 if ! [[ $SHELL =~ bash$ ]]; then
   error "Only bash is supported for installation"
 fi
+
+info "Configure System (${VERSION})"
 
 # Distinction between "OS = ubuntu" and "OS_TYPE = debian"
 # Any test that relies on particular packages being present uses 'OS = ubuntu'.
@@ -117,15 +121,17 @@ function path_safe_append () {
 }
 
 function force_update_yes_if_debian_like() {
-    # APT::Get::force-yes "true"; deprecated
-    if ! [ -f /etc/apt/apt.conf.d/90forceyes ]; then
-        info "Force all responses to apt-get prompts to 'yes'"
-        sudo mkdir -p /etc/apt/apt.conf.d
-        cat > 90forceyes <<-UPDATE_YES
-APT::Get::Assume-Yes "true";
+    if [ "$OS_TYPE" == 'debian' ]; then
+      # APT::Get::force-yes "true"; deprecated
+      if ! [ -f /etc/apt/apt.conf.d/90forceyes ]; then
+          info "Force all responses to apt-get prompts to 'yes'"
+          sudo mkdir -p /etc/apt/apt.conf.d
+          cat > 90forceyes <<-UPDATE_YES
+  APT::Get::Assume-Yes "true";
 UPDATE_YES
-        sudo cp 90forceyes /etc/apt/apt.conf.d/90forceyes
-        rm 90forceyes
+          sudo cp 90forceyes /etc/apt/apt.conf.d/90forceyes
+          rm 90forceyes
+      fi
     fi
 }
 
@@ -142,8 +148,8 @@ function install_homebrew_and_cask_if_macos() {
     if [ "$brew" == "" ]; then
        info "Installing Homebrew"
        /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-#       info "Installing homebrew cask"
-#       brew tap caskroom/cask
+       info "Installing homebrew cask"
+       brew cask list
     fi
   fi
 }
@@ -179,6 +185,10 @@ function install_python3_pip3_if_missing() {
       error "Problem with installation of python3 or pip3. Try to install manually and then rerun this script."
     fi
   fi
+}
+
+function install_python3_packages() {
+  pip3 install python-dateutil
 }
 
 function install_rbenv_if_missing() {
@@ -217,7 +227,28 @@ function install_rbenv_if_missing() {
 
 }
 
-function install_ruby_if_missing() {
+function install_mas_Xcode_if_macos_if_missing() {
+    if [ "$OS" == 'macos' ]; then
+        mas=$(which mas)
+        if [ "$mas" == "" ]; then
+            # Install mas
+            info "Installing mas - Mac App Store command-line"
+            brew install mas
+            # Force initialization of mas
+            mas list
+        fi
+        # Make sure Xcode is installed - gets gcc etc.
+        xcode=$(mas list | grep -i xcode)
+        if [ "$xcode" == "" ]; then
+            # Requires existing GUI sign-on to AppStore
+            # 497799835 Xcode (10.0)
+            info "Installing Xcode from Mac App Store"
+            mas install '497799835'
+        fi
+    fi
+}
+
+function install_gcc_if_ubuntu_if_missing() {
 
     if [ "$OS" == 'ubuntu' ]; then
 
@@ -242,23 +273,9 @@ function install_ruby_if_missing() {
             sudo apt-get install -y zlib1g-dev
         fi
     fi
+}
 
-    if [ "$OS" == 'macos' ]; then
-        mas=$(which mas)
-        if [ "$mas" == "" ]; then
-            # Install mas
-            info "Installing mas - Mac App Store command-line"
-            brew install mas
-        fi
-        # Make sure Xcode is installed - gets gcc etc.
-        xcode=$(mas list | grep -i xcode)
-        if [ "$xcode" == "" ]; then
-            # Requires existing GUI sign-on to AppStore
-            # 497799835 Xcode (10.0)
-            info "Installing Xcode from Mac App Store"
-            mas install '497799835'
-        fi
-    fi
+function install_ruby_if_missing() {
 
     ruby_bin=$(which ruby)
     if [ -z "$ruby_bin" ]; then
@@ -277,60 +294,6 @@ function install_ruby_if_missing() {
     fi
 }
 
-# TODO This could all go into the python-based portion of the installation
-
-#function find_ansible_bin() {
-#    ansible_bin=$(which ansible)
-#    if [ -z "$ansible_bin" ]; then
-#        ansible_find=$(sudo find / -name ansible)
-#        if [ -n "$ansible_find"  ]; then
-#            ansible_find=$(sudo find / -name ansible | grep bin)
-#            if [ -n "$ansible_find" ]; then
-#                echo $ansible_find
-#            else
-#                echo -n ""
-#            fi
-#        else
-#            echo -n ""
-#        fi
-#    else
-#        echo $ansible_bin
-#    fi
-#}
-#
-#function install_ansible_if_missing() {
-#    if [ $DEBUG == 'true' ]; then
-#        echo "install_ansible_if_needed PATH ${PATH}"
-#        echo "install_ansible_if_needed python3 which $(which python3)"
-#        echo "install_ansible_if_needed pip3 which $(which pip3)"
-#    fi
-#    ansible_bin=$(find_ansible_bin)
-#    if [ -z "$ansible_bin" ]; then
-#        # Force ansible to be installed using python3
-#        pip3 install ansible
-#        ansible_bin=$(find_ansible_bin)
-#    fi
-#    export ANSIBLE_BIN_DIR=$(dirname $ansible_bin)
-#}
-#
-#function add_ansible_bin_to_path_if_missing() {
-#    echo "$PATH" | grep "$ANSIBLE_BIN_DIR" > /dev/null
-#    exit_code=$?
-#    if [ "$exit_code" == "1" ]; then
-#        export PATH="$PATH:$ANSIBLE_BIN_DIR"
-#    fi
-#    if [ -f $BASH_PROFILE ]; then
-#        grep "$ANSIBLE_BIN_DIR" $BASH_PROFILE > /dev/null
-#        exit_code=$?
-#        if [ "$exit_code" == "1" ]; then
-#            echo "export PATH=\"$PATH\"" >> $BASH_PROFILE
-#        fi
-#    else
-#        echo "export PATH=\"$PATH\"" > $BASH_PROFILE
-#    fi
-#}
-
-
 ####
 # Perform the installations in sequence
 ####
@@ -340,8 +303,9 @@ force_update_yes_if_debian_like
 update_if_debian_like
 install_git_if_missing
 install_python3_pip3_if_missing
-#install_ansible_if_missing
-#add_ansible_bin_to_path_if_missing
+install_python3_packages
+install_mas_Xcode_if_macos_if_missing
+install_gcc_if_ubuntu_if_missing
 install_rbenv_if_missing
 install_ruby_if_missing
 

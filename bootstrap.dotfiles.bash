@@ -40,6 +40,26 @@ function link_startup_file() {
     fi
 }
 
+function create_base_dotfiles_if_needed() {
+    # If we haven't seen this host before in the repo, create the host-specific files
+    dotfiles_dir="${HOME}/.startup/dotfiles"
+    host_startup_dir=$(hostname)
+    pushd ${dotfiles_dir}
+    if ! [ -d ${host_startup_dir} ]; then
+        reference_dir="$(pwd)/reference"
+        mkdir -p ${host_startup_dir}
+        pushd ${host_startup_dir}
+        current_dir=$(pwd)
+        ln -s "$(reference_dir)/bash_aliases" "${current_dir}/bash_aliases"
+        ln -s "$(reference_dir)/bash_env" "${current_dir}/bash_env"
+        ln -s "$(reference_dir)/bash_profile" "${current_dir}/bash_profile"
+        ln -s "$(reference_dir)/bashrc" "${current_dir}/bashrc"
+        touch bash_local
+        popd
+    fi
+    popd
+}
+
 mkdir -p ${STARTUP_DIR}
 mkdir -p ${STARTUP_BACKUP_DIR}
 
@@ -60,6 +80,7 @@ if [ -f ${BOOTSTRAP_PERSONAL} ]; then
         git pull origin master
         popd
     fi
+
     if ! [ -d dotfiles ]; then
         git clone git@github.com:tflynn/dotfiles.git
     else
@@ -67,6 +88,9 @@ if [ -f ${BOOTSTRAP_PERSONAL} ]; then
         git pull origin master
         popd
     fi
+    # If we haven't seen this host before in the repo, create the host-specific files
+    create_base_dotfiles_if_needed
+
     if ! [ -d mybin ]; then
         git clone git@github.com:tflynn/mybin.git
     else
@@ -97,6 +121,10 @@ else
         git pull origin master
         popd
     fi
+
+    # If we haven't seen this host before in the repo, create the host-specific files
+    create_base_dotfiles_if_needed
+
     if ! [ -d mybin ]; then
         git clone https://github.com/tflynn/mybin.git
     else

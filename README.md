@@ -36,6 +36,7 @@ beyond what should be present on any basic *nix-like system.
 
 If the target system is intended to be a personal system:
 
+* Log into the Apple Store
 * Generate a suitable public/private key
 * Load the public key in github
 * Mark system as a personal system
