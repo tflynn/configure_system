@@ -4,6 +4,9 @@
 DEBUG='false'
 VERSION="0.5"
 
+my_temp="${HOME}/tmp"
+export MY_TEMP=${MY_TEMP:-${my_temp}}
+
 debug() {
   if [ $DEBUG == 'true' ]; then
     echo "DEBUG: $1"
@@ -115,7 +118,7 @@ mkdir -p ${STARTUP_DIR}
 mkdir -p ${STARTUP_BACKUP_DIR}
 
 cd ${STARTUP_DIR}
-å
+
 if ! [ -d bash-it ]; then
     git clone https://github.com/Bash-it/bash-it.git
 else

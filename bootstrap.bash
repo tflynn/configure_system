@@ -232,19 +232,21 @@ function install_mas_Xcode_if_macos_if_missing() {
         mas=$(which mas)
         if [ "$mas" == "" ]; then
             # Install mas
+            # 2018/10/2 Note that MacOS Mojave 'mas login ...' fails
+            #           But 'mas install ...' works if logged into the Apple Store
             info "Installing mas - Mac App Store command-line"
             brew install mas
             # Force initialization of mas
             mas list
         fi
-        # Make sure Xcode is installed - gets gcc etc.
-        xcode=$(mas list | grep -i xcode)
-        if [ "$xcode" == "" ]; then
-            # Requires existing GUI sign-on to AppStore
-            # 497799835 Xcode (10.0)
-            info "Installing Xcode from Mac App Store"
-            mas install '497799835'
-        fi
+#        # Make sure Xcode is installed - gets gcc etc.
+#        xcode=$(mas list | grep -i xcode)
+#        if [ "$xcode" == "" ]; then
+#            # Requires existing GUI sign-on to AppStore
+#            # 497799835 Xcode (10.0)
+#            info "Installing Xcode from Mac App Store"
+#            mas install '497799835'
+#        fi
     fi
 }
 

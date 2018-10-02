@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+my_temp="${HOME}/tmp"
+export MY_TEMP=${MY_TEMP:-${my_temp}}
+
 # Install required Python packages
 pip3 install git+https://github.com/tflynn/standard_logger.git@master#egg=standard_logger
 pip3 install git+https://github.com/tflynn/run_command.git@master#egg=run_command
