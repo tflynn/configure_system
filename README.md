@@ -2,6 +2,9 @@
 
 Configure a (new) system from scratch
 
+macOS Mojave note: Automated installs from the Apple Store fail.
+
+
 ## Intallation
 
 ```
