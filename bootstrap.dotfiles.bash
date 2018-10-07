@@ -93,6 +93,7 @@ function create_base_dotfiles_if_needed() {
     if ! [ -d ${host_startup_dir} ]; then
         info "create_base_dotfiles_if_needed ${host_startup_dir}"
         reference_dir="$(pwd)/reference"
+        mkdir -p ${reference_dir}
         mkdir -p ${host_startup_dir}
         pushd ${host_startup_dir}
         current_dir=$(pwd)
