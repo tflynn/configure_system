@@ -204,12 +204,14 @@ function link_bin_file() {
     source_file=$1
     full_source_file="${STARTUP_DIR}/mybin/${source_file}"
     full_target_file="${HOME}/bin/${source_file}"
-    if [ -e ${full_target_file} ]; then
-        rm -f ${full_target_file}
-    fi
-    if ! [ -e ${full_target_file} ]; then
-        info "link_bin_file ${full_source_file} ${full_target_file}"
-        ln -s ${full_source_file} ${full_target_file}
+    if [ "${full_target_file}" -ot "${full_source_file}" ]; then
+        if [ -e ${full_target_file} ]; then
+            rm -f ${full_target_file}
+        fi
+        if ! [ -e ${full_target_file} ]; then
+            info "link_bin_file ${full_source_file} ${full_target_file}"
+            ln -s ${full_source_file} ${full_target_file}
+        fi
     fi
 }
 
