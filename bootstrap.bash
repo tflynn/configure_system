@@ -143,14 +143,20 @@ function update_if_debian_like() {
 }
 
 function add_user_as_sudoer_if_missing() {
-    sudoers_d_directory="/etc/sudoers.d"
-    if ! [ -d $sudoers_d_directory ]; then
-        mkdir -p $sudoers_d_directory
-    fi
-    sudoers_d_file_name="${sudoers_d_directory}/${USER}"
-    if ! [ -e "${sudoers_d_file_name}" ]; then
-        echo "${USER}	ALL=(ALL) NOPASSWD:ALL" > "${sudoers_d_file_name}"
-    fi
+    sudoers_script="${MY_TEMP}/add_sudoers"
+    cat <<-SUDOERS_SCRIPT_CONTENTS  > "${sudoers_script}"
+#!/usr/bin/env bash
+sudoers_d_directory="/etc/sudoers.d"
+if ! [ -d "\${sudoers_d_directory}" ]; then
+    mkdir -p "\${sudoers_d_directory}"
+fi
+sudoers_d_file_name="\${sudoers_d_directory}/\${USER}"
+if ! [ -e "\${sudoers_d_file_name}" ]; then
+    echo "\${USER}	ALL=(ALL) NOPASSWD:ALL" > "\${sudoers_d_file_name}"
+fi
+SUDOERS_SCRIPT_CONTENTS
+    chmod a+x "${sudoers_script}"
+    sudo "${sudoers_script}"
 }
 
 function install_homebrew_and_cask_if_macos() {
