@@ -142,6 +142,17 @@ function update_if_debian_like() {
   fi
 }
 
+function add_user_as_sudoer_if_missing() {
+    sudoers_d_directory="/etc/sudoers.d"
+    if ! [ -d $sudoers_d_directory ]; then
+        mkdir -p $sudoers_d_directory
+    fi
+    sudoers_d_file_name="${sudoers_d_directory}/${USER}"
+    if ! [ -e "${sudoers_d_file_name}" ]; then
+        echo "${USER}	ALL=(ALL) NOPASSWD:ALL" > "${sudoers_d_file_name}"
+    fi
+}
+
 function install_homebrew_and_cask_if_macos() {
   if [ $OS == 'macos' ]; then
     brew=$(which brew)
@@ -232,8 +243,7 @@ function install_mas_Xcode_if_macos_if_missing() {
         mas=$(which mas)
         if [ "$mas" == "" ]; then
             # Install mas
-            # 2018/10/2 Note that MacOS Mojave 'mas login ...' fails
-            #           But 'mas install ...' works if logged into the Apple Store
+            # 2018/10/2 Note that MacOS Mojave 'mas login ...' and 'mas install ....' fails
             info "Installing mas - Mac App Store command-line"
             brew install mas
             # Force initialization of mas
@@ -300,6 +310,7 @@ function install_ruby_if_missing() {
 # Perform the installations in sequence
 ####
 
+add_user_as_sudoer_if_missing
 install_homebrew_and_cask_if_macos
 force_update_yes_if_debian_like
 update_if_debian_like
