@@ -143,20 +143,17 @@ function update_if_debian_like() {
 }
 
 function add_user_as_sudoer_if_missing() {
-    sudoers_script="${MY_TEMP}/add_sudoers"
-    cat <<-SUDOERS_SCRIPT_CONTENTS  > "${sudoers_script}"
-#!/usr/bin/env bash
-sudoers_d_directory="/etc/sudoers.d"
-if ! [ -d "\${sudoers_d_directory}" ]; then
-    mkdir -p "\${sudoers_d_directory}"
-fi
-sudoers_d_file_name="\${sudoers_d_directory}/\${USER}"
-if ! [ -e "\${sudoers_d_file_name}" ]; then
-    echo "\${USER}	ALL=(ALL) NOPASSWD:ALL" > "\${sudoers_d_file_name}"
-fi
-SUDOERS_SCRIPT_CONTENTS
-    chmod a+x "${sudoers_script}"
-    sudo "${sudoers_script}"
+    # Create sudoers.d file in user space so substitutions are correct
+    source_sudoers_file="${MY_TEMP}/${USER}.sudo"
+    echo "${USER}  ALL=(ALL) NOPASSWD:ALL" > "${source_sudoers_file}"
+    sudo chown root:wheel "${source_sudoers_file}"
+    sudo chmod 440 "${source_sudoers_file}"
+    sudoers_d_directory="/etc/sudoers.d"
+    mkdir -p "${sudoers_d_directory}"
+    target_sudoers_file="${sudoers_d_directory}/${USER}"
+    sudo cp -f "${source_sudoers_file}" "${target_sudoers_file}"
+    sudo chown root:wheel "${target_sudoers_file}"
+    sudo chmod 440 "${target_sudoers_file}"
 }
 
 function install_homebrew_and_cask_if_macos() {
