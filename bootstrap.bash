@@ -142,17 +142,15 @@ function update_if_debian_like() {
   fi
 }
 
-function add_user_as_sudoer_if_missing() {
+function add_user_as_sudoer() {
     # Create sudoers.d file in user space so substitutions are correct
     source_sudoers_file="${MY_TEMP}/${USER}.sudo"
     echo "${USER}  ALL=(ALL) NOPASSWD:ALL" > "${source_sudoers_file}"
-    sudo chown root:wheel "${source_sudoers_file}"
-    sudo chmod 440 "${source_sudoers_file}"
     sudoers_d_directory="/etc/sudoers.d"
-    mkdir -p "${sudoers_d_directory}"
+    sudo mkdir -p "${sudoers_d_directory}"
     target_sudoers_file="${sudoers_d_directory}/${USER}"
     sudo cp -f "${source_sudoers_file}" "${target_sudoers_file}"
-    sudo chown root:wheel "${target_sudoers_file}"
+    #sudo chown root:wheel "${target_sudoers_file}"
     sudo chmod 440 "${target_sudoers_file}"
 }
 
@@ -313,7 +311,7 @@ function install_ruby_if_missing() {
 # Perform the installations in sequence
 ####
 
-add_user_as_sudoer_if_missing
+add_user_as_sudoer
 install_homebrew_and_cask_if_macos
 force_update_yes_if_debian_like
 update_if_debian_like
