@@ -154,6 +154,13 @@ function add_user_as_sudoer() {
     sudo chmod 440 "${target_sudoers_file}"
 }
 
+function create_vimrc() {
+  cat <<-VIMRC >${HOME}/.vimrc
+syntax off
+set nu
+VIMRC
+}
+
 function install_homebrew_and_cask_if_macos() {
   if [ $OS == 'macos' ]; then
     brew=$(which brew)
@@ -179,28 +186,68 @@ function install_git_if_missing() {
     fi
 }
 
+function install_pyenv_if_missing() {
+  which pyenv
+  if [ "$?" != "0" ]; then
+    if [ -d "${HOME}/.pyenv" ]; then
+      rm -rf "${HOME}/.pyenv"
+    fi
+    git clone https://github.com/pyenv/pyenv.git ${HOME}/.pyenv
+  fi
+
+  # In dotfiles/bash_env
+  # Only here for bootstrap purposes
+  echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
+  echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
+  echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bash_profile
+  source $BASH_PROFILE
+}
+
 function install_python3_pip3_if_missing() {
+  # Install everything using pyenv  
+  python=$(which python)
+  pip=$(which python)
+  if [ "$python" != "" ] && [ "$pip" != "" ]; then
+    :
+    # echo "python and pip already installed"
+  else
+    info "python or pip not installed. Trying to install both using pyenv."
+    pyenv install 2.7.15
+    python=$(which python)
+    pip=$(which python)
+    if [ "$python" == "" ] || [ "$pip" == "" ]; then
+      error "Problem with installation of python or pip. Try to install manually and then rerun this script."
+    fi
+  fi
+  # Set pyenv to point to python just installed
+  pyenv global 2.7.15
+  pip install --upgrade pip
+  install_python_packages
+
   python3=$(which python3)
   pip3=$(which pip3)
   if [ "$python3" != "" ] && [ "$pip3" != "" ]; then
     :
     # echo "python3 and pip3 already installed"
   else
-    info "python3 or pip3 not installed. Trying to install both."
-    if_macos && brew install python3
-    if [ $OS_TYPE == 'debian' ]; then
-      sudo apt-get -y install python3-pip
-    fi
+    info "python3 or pip3 not installed. Trying to install both using pyenv."
+    pyenv install 3.6.5
     python3=$(which python3)
     pip3=$(which pip3)
     if [ "$python3" == "" ] || [ "$pip3" == "" ]; then
       error "Problem with installation of python3 or pip3. Try to install manually and then rerun this script."
     fi
   fi
+
+    # Set pyenv to point to python just installed
+  pyenv global 3.6.5
+  pip install --upgrade pip
+  install_python_packages
 }
 
-function install_python3_packages() {
-  pip3 install python-dateutil
+function install_python_packages() {
+  pip install virtualenv
+  pip install python-dateutil
 }
 
 function install_rbenv_if_missing() {
@@ -261,7 +308,16 @@ function install_mas_Xcode_if_macos_if_missing() {
     fi
 }
 
-function install_gcc_if_ubuntu_if_missing() {
+function install_lib_if_ubuntu_if_missing() {
+  lib_name="$1"
+  lib_present=$(apt list --installed 2>&1 | grep -iv 'warning' | grep ${lib_name})
+  if [ "$lib_present" == "" ]; then
+    info "Installing ${lib_name}"
+    sudo apt-get install -y ${lib_name}
+  fi
+}
+
+function install_gcc_and_libs_if_ubuntu_if_missing() {
 
     if [ "$OS" == 'ubuntu' ]; then
 
@@ -270,21 +326,13 @@ function install_gcc_if_ubuntu_if_missing() {
             info "Installing build tools etc"
             sudo apt-get install -y build-essential
         fi
-        libssl=$(apt list --installed 2>&1 | grep -iv 'warning' | grep libssl-dev)
-        if [ "$libssl" == "" ]; then
-            info "Installing libssl-dev"
-            sudo apt-get install -y libssl-dev
-        fi
-        libreadline=$(apt list --installed 2>&1 | grep -iv 'warning' | grep libreadline-dev)
-        if [ "$libreadline" == "" ]; then
-            info "Installing libreadline-dev"
-            sudo apt-get install -y libreadline-dev
-        fi
-        zlib1g=$(apt list --installed 2>&1 | grep -iv 'warning' | grep zlib1g-dev)
-        if [ "$zlib1g" == "" ]; then
-            info "Installing zlib1g-dev"
-            sudo apt-get install -y zlib1g-dev
-        fi
+
+        libs=('libssl-dev' 'libreadline-dev' 'zlib1g-dev' 'libbz2-dev' 'libsqlite3-dev')
+        for lib in "${libs[@]}"
+        do
+          install_lib_if_ubuntu_if_missing $lib
+        done
+
     fi
 }
 
@@ -312,16 +360,18 @@ function install_ruby_if_missing() {
 ####
 
 add_user_as_sudoer
+create_vimrc
 install_homebrew_and_cask_if_macos
 force_update_yes_if_debian_like
 update_if_debian_like
 install_git_if_missing
-install_python3_pip3_if_missing
-install_python3_packages
 install_mas_Xcode_if_macos_if_missing
-install_gcc_if_ubuntu_if_missing
+install_gcc_and_libs_if_ubuntu_if_missing
 install_rbenv_if_missing
 install_ruby_if_missing
+install_pyenv_if_missing
+install_python3_pip3_if_missing
+install_python_packages
 
 # Signal reboot to get everything as it should be
 # Currently only do this on non-MacOS
